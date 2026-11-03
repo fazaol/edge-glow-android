@@ -1,12 +1,17 @@
 
 package com.fazaol.edgeglow
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,14 +31,30 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EdgeGlowScreen()
+            EdgeGlowScreen(
+                onNotificationPermission = {
+                    startActivity(
+                        Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                    )
+                },
+                onOverlayPermission = {
+                    startActivity(
+                        Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                    )
+                }
+            )
         }
     }
 }
 
 @Composable
-fun EdgeGlowScreen() {
-    var enabled by remember { mutableStateOf(false) }
+fun EdgeGlowScreen(
+    onNotificationPermission: () -> Unit,
+    onOverlayPermission: () -> Unit
+) {
     var selectedEffect by remember { mutableStateOf("Glow") }
 
     val effects = listOf(
@@ -48,20 +69,21 @@ fun EdgeGlowScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(22.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "EDGE GLOW",
+                "EDGE GLOW",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White
             )
 
             Text(
-                text = "SMART NOTIFICATIONS",
+                "SMART NOTIFICATIONS",
                 fontSize = 11.sp,
                 letterSpacing = 3.sp,
                 color = NeonBlue
@@ -70,7 +92,7 @@ fun EdgeGlowScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(170.dp)
                     .background(
                         Brush.linearGradient(
                             listOf(
@@ -84,11 +106,7 @@ fun EdgeGlowScreen() {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "✦",
-                        fontSize = 48.sp,
-                        color = NeonBlue
-                    )
+                    Text("✦", fontSize = 48.sp, color = NeonBlue)
                     Text(
                         "Seu celular, com mais luz.",
                         color = Color.White,
@@ -103,36 +121,33 @@ fun EdgeGlowScreen() {
                 }
             }
 
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = CardColor
-                ),
-                shape = RoundedCornerShape(18.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "Iluminação nas bordas",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "Ativar efeitos luminosos",
-                            color = Color.Gray,
-                            fontSize = 12.sp
-                        )
-                    }
+            Text(
+                "CONFIGURAÇÕES NECESSÁRIAS",
+                color = NeonBlue,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-                    Switch(
-                        checked = enabled,
-                        onCheckedChange = { enabled = it }
-                    )
-                }
+            Button(
+                onClick = onNotificationPermission,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF263A68)
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Autorizar acesso às notificações")
+            }
+
+            Button(
+                onClick = onOverlayPermission,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF493078)
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Autorizar iluminação sobre outros apps")
             }
 
             Text(
@@ -153,7 +168,7 @@ fun EdgeGlowScreen() {
                             else CardColor,
                             RoundedCornerShape(12.dp)
                         )
-                        .padding(14.dp),
+                        .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -170,8 +185,6 @@ fun EdgeGlowScreen() {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             Text(
                 "EDGE GLOW • VERSION 1.0",
