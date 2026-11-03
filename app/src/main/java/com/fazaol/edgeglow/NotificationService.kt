@@ -3,36 +3,32 @@ package com.fazaol.edgeglow
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.provider.Settings
 import android.util.Log
 
 class NotificationService : NotificationListenerService() {
 
-    override fun onNotificationPosted(
-        sbn: StatusBarNotification
-    ) {
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
         super.onNotificationPosted(sbn)
 
-        val appName = sbn.packageName
-        val notification = sbn.notification
-        val extras = notification.extras
+        val packageName = sbn.packageName
 
-        val title = extras.getCharSequence("android.title")?.toString()
-        val message = extras.getCharSequence("android.text")?.toString()
+        // Ignora as notificações do próprio EDGE GLOW
+        if (packageName == this.packageName) return
 
-        Log.d(
-            "EDGE_GLOW",
-            "Notificação recebida: $appName | $title | $message"
-        )
-    }
+        val title = sbn.notification.extras
+            .getCharSequence("android.title")?.toString()
 
-    override fun onNotificationRemoved(
-        sbn: StatusBarNotification
-    ) {
-        super.onNotificationRemoved(sbn)
+        val message = sbn.notification.extras
+            .getCharSequence("android.text")?.toString()
 
         Log.d(
             "EDGE_GLOW",
-            "Notificação removida: ${sbn.packageName}"
+            "Notificação: $packageName | $title | $message"
         )
+
+        if (Settings.canDrawOverlays(this)) {
+            GlowService.show(this)
+        }
     }
 }
